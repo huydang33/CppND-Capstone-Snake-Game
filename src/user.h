@@ -4,12 +4,17 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include "util.h"
 
 class User {
 public:
-    User(std::string username = "", std::string password = "");
+    User(std::string username = "", std::string password = "", std::string score = "");
     
+    void setUsername(const std::string &username);
+    void setPassword(const std::string &password);
+    void setUserscore(const std::string &userscore);
     const std::string& getUsername() const;
+    const std::string& getUserscore() const;
     bool checkPassword(const std::string& password) const;
 
     // "username password"
@@ -20,8 +25,9 @@ public:
 private:
     std::string _username;
     std::string _password;
+    std::string _userscore;
 
-    // Băm mật khẩu bằng SHA-256
+    // Hash password with SHA-256
     static std::string hashPassword(const std::string& password);
 };
 
@@ -30,8 +36,12 @@ class UserManager
 public:
     UserManager(const std::string& filename);
 
-    bool addUser(const std::string& username, const std::string& password);
-    bool authenticateUser(const std::string& username, const std::string& password);
+    e_return_result addUser(const std::string& username, const std::string& password);
+    e_return_result authenticateUser(const std::string& username, const std::string& password);
+    e_return_result loginUser(User &user);
+    e_return_result registerNewUser();
+    
+    e_return_result saveToFile(const std::string username, const int score);
 
 private:
     std::vector<User> _users;
