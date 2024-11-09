@@ -28,7 +28,7 @@ int main()
 	}
 	else if (choice == 1)
 	{
-		ret = manager.registerNewUser();
+		ret = manager.registerNewUser(user);
 	}
 	else
 	{
@@ -56,11 +56,6 @@ int main()
 		/* If personal score higher than stored user score, then update user score*/
 		if(std::stoi(user.getUserscore()) < game.GetScore())
 			ret = manager.saveToFile(user.getUsername(), game.GetScore());
-	}
-
-	if(ret != RET_OK)
-	{
-		std::cerr << "Program execution has error, please check again\n";
 	}
 	
 	return ret;

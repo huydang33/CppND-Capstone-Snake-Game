@@ -68,29 +68,35 @@ void UserManager::loadUsersFromFile() {
     }
 }
 
-void UserManager::saveUsersToFile() {
-    // std::ofstream file(_filename);
+e_return_result UserManager::saveUsersToFile(User const user) {
+    e_return_result ret = RET_OK;
     std::ofstream file(_filename, std::ios::out | std::ios::app);
     if (!file.is_open()) {
         std::cerr << "Failed to open file for writing!" << std::endl;
+        ret = RET_NG;
     }
+    file << user.toString() << std::endl;
 
-    for (const auto& user : _users) {
-        file << user.toString() << std::endl;
-    }
+    return ret;
 }
 
 e_return_result UserManager::addUser(const std::string& username, const std::string& password) {
+    e_return_result ret = RET_OK;
     // Check if user exists
     for (const auto& user : _users) {
         if (user.getUsername() == username) {
-            return RET_NG;
+            ret = RET_NG;
         }
     }
-    // Add new user
-    _users.push_back(User(username, password, "0"));
-    saveUsersToFile();
-    return RET_OK;
+
+    if(ret == RET_OK)
+    {
+        // Add new user
+        User new_user = User(username, password, "0");
+        _users.push_back(new_user);
+        ret = saveUsersToFile(new_user);
+    }
+    return ret;
 }
 
 e_return_result UserManager::authenticateUser(const std::string& username, const std::string& password) {
@@ -102,7 +108,21 @@ e_return_result UserManager::authenticateUser(const std::string& username, const
     return RET_NG; // login failed
 }
 
-e_return_result UserManager::registerNewUser()
+e_return_result UserManager::setUser(User &user, std::string const &username, std::string const &password)
+{
+    e_return_result ret = RET_OK;
+    // Assign username and password to the argument user
+    user.setUsername(username);
+    user.setPassword(password);
+    for (const auto& loop_user : _users) {
+        if (loop_user.getUsername() == user.getUsername())
+            user.setUserscore(loop_user.getUserscore());
+    }
+
+    return ret;
+}
+
+e_return_result UserManager::registerNewUser(User &user)
 {
     e_return_result ret = RET_OK;
 	std::string username, password;
@@ -112,6 +132,7 @@ e_return_result UserManager::registerNewUser()
 
 	if (addUser(username, password) == RET_OK) {
 	    std::cout << "User added successfully!" << std::endl;
+        ret = setUser(user, username, password);
 	} else {
 	    std::cout << "User already exists!" << std::endl;
         ret = RET_NG;
@@ -131,13 +152,7 @@ e_return_result UserManager::loginUser(User &user)
 	if (authenticateUser(username, password) == RET_OK) 
 	{
 		std::cout << "Login successful!" << std::endl;
-        // Assign username and password to the argument user
-        user.setUsername(username);
-		user.setPassword(password);
-        for (const auto& loop_user : _users) {
-            if (loop_user.getUsername() == user.getUsername())
-                user.setUserscore(loop_user.getUserscore());
-        }
+        ret = setUser(user, username, password);
 	} 
 	else 
 	{

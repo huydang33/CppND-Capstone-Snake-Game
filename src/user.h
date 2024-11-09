@@ -39,7 +39,8 @@ public:
     e_return_result addUser(const std::string& username, const std::string& password);
     e_return_result authenticateUser(const std::string& username, const std::string& password);
     e_return_result loginUser(User &user);
-    e_return_result registerNewUser();
+    e_return_result registerNewUser(User &user);
+    e_return_result setUser(User &user, std::string const &username, std::string const &password);
     
     e_return_result saveToFile(const std::string username, const int score);
 
@@ -48,7 +49,7 @@ private:
     std::string _filename;
 
     void loadUsersFromFile();
-    void saveUsersToFile();
+    e_return_result saveUsersToFile(User const user);
 };
 
 #endif
