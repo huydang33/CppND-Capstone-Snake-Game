@@ -56,16 +56,23 @@ std::string User::hashPassword(const std::string& password) {
 }
 
 // UserManager class implementation
-UserManager::UserManager(const std::string& filename) : _filename(filename) {
-    loadUsersFromFile();
-}
+UserManager::UserManager(const std::string& filename) : _filename(filename) {}
 
-void UserManager::loadUsersFromFile() {
+e_return_result UserManager::loadUsersFromFile() {
+    e_return_result ret = RET_OK;
     std::ifstream file(_filename);
-    std::string line;
-    while (std::getline(file, line)) {
-        _users.push_back(User::fromString(line));
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file " << _filename << " for writing!" << std::endl;
+        ret = RET_NG_SYS;
     }
+    else {
+        std::string line;
+        while (std::getline(file, line)) {
+            _users.push_back(User::fromString(line));
+        }
+    }
+
+    return ret;
 }
 
 e_return_result UserManager::saveUsersToFile(User const user) {
@@ -73,9 +80,11 @@ e_return_result UserManager::saveUsersToFile(User const user) {
     std::ofstream file(_filename, std::ios::out | std::ios::app);
     if (!file.is_open()) {
         std::cerr << "Failed to open file for writing!" << std::endl;
-        ret = RET_NG;
+        ret = RET_NG_SYS;
     }
-    file << user.toString() << std::endl;
+
+    if (ret == RET_OK)
+        file << user.toString() << std::endl;
 
     return ret;
 }
@@ -85,7 +94,7 @@ e_return_result UserManager::addUser(const std::string& username, const std::str
     // Check if user exists
     for (const auto& user : _users) {
         if (user.getUsername() == username) {
-            ret = RET_NG;
+            ret = RET_NG_USER;
         }
     }
 
@@ -105,7 +114,7 @@ e_return_result UserManager::authenticateUser(const std::string& username, const
             return RET_OK; // login success
         }
     }
-    return RET_NG; // login failed
+    return RET_NG_USER; // login failed
 }
 
 e_return_result UserManager::setUser(User &user, std::string const &username, std::string const &password)
@@ -130,13 +139,15 @@ e_return_result UserManager::registerNewUser(User &user)
 	std::cin >> username;
 	hidePassword(password);
 
-	if (addUser(username, password) == RET_OK) {
+    ret = addUser(username, password);
+	if (ret == RET_OK) {
 	    std::cout << "User added successfully!" << std::endl;
         ret = setUser(user, username, password);
+	} else if (ret == RET_NG_USER) {
+	    std::cerr << "Error in adding new user!" << std::endl;
 	} else {
-	    std::cout << "User already exists!" << std::endl;
-        ret = RET_NG;
-	}
+        /* */
+    }
 
     return ret;
 }
@@ -157,7 +168,7 @@ e_return_result UserManager::loginUser(User &user)
 	else 
 	{
 		std::cout << "Invalid username or password!" << std::endl;
-		ret = RET_NG;
+		ret = RET_NG_USER;
 	}
 
 	return ret;
@@ -195,12 +206,12 @@ e_return_result UserManager::saveToFile(const std::string username, const int va
     else
     {
         std::cerr << "Cannot open: " << _filename << std::endl;
-        ret = RET_NG;
+        ret = RET_NG_SYS;
     }
 
     // Return NG if not found username
     if (!userFound) {
-        ret = RET_NG;
+        ret = RET_NG_SYS;
     }
 
     if (ret == RET_OK)
@@ -215,7 +226,7 @@ e_return_result UserManager::saveToFile(const std::string username, const int va
             fileOut.close();
         } else {
             std::cerr << "Cannot open: " << _filename << std::endl;
-            ret = RET_NG;
+            ret = RET_NG_SYS;
         }
     }
 

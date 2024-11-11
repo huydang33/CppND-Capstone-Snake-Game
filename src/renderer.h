@@ -4,6 +4,7 @@
 #include <vector>
 #include "SDL.h"
 #include "snake.h"
+#include "obstacle.h"
 
 class Renderer {
  public:
@@ -11,7 +12,7 @@ class Renderer {
            const std::size_t grid_width, const std::size_t grid_height);
   ~Renderer();
 
-  void Render(Snake const snake, SDL_Point const &food);
+  void Render(Snake const snake, SDL_Point const &food, std::vector<std::unique_ptr<Obstacle>> &obstacles);
   void UpdateWindowTitle(int score, int fps);
 
  private:
@@ -22,6 +23,8 @@ class Renderer {
   const std::size_t screen_height;
   const std::size_t grid_width;
   const std::size_t grid_height;
+
+  void RenderObstacle(std::vector<std::unique_ptr<Obstacle>> &obstacle);
 };
 
 #endif

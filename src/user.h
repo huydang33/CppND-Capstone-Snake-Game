@@ -41,14 +41,13 @@ public:
     e_return_result loginUser(User &user);
     e_return_result registerNewUser(User &user);
     e_return_result setUser(User &user, std::string const &username, std::string const &password);
-    
+    e_return_result loadUsersFromFile();
     e_return_result saveToFile(const std::string username, const int score);
 
 private:
     std::vector<User> _users;
     std::string _filename;
 
-    void loadUsersFromFile();
     e_return_result saveUsersToFile(User const user);
 };
 

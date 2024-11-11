@@ -2,6 +2,18 @@
 #include <iostream>
 #include "SDL.h"
 
+SDL_Texture* LoadTexture(const std::string &file, SDL_Renderer* renderer)
+{
+  SDL_Surface* bmp = SDL_LoadBMP(file.c_str());
+  if (!bmp) {
+      std::cerr << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
+      return nullptr;
+  }
+  SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, bmp);
+  SDL_FreeSurface(bmp);
+  return tex;
+}
+
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(grid_width, grid_height),
       engine(dev()),
@@ -25,7 +37,8 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
     Update();
-    renderer.Render(snake, food);
+    UpdateObstacles();
+    renderer.Render(snake, food, obstacles);
 
     frame_end = SDL_GetTicks();
 
@@ -62,6 +75,21 @@ void Game::PlaceFood() {
       food.y = y;
       return;
     }
+  }
+}
+
+void Game::InitObstacles(SDL_Renderer* renderer) {
+  SDL_Texture* rockTexture = LoadTexture("images/rock.bmp", renderer);
+  SDL_Texture* birdTexture = LoadTexture("images/bird.bmp", renderer);
+  // Initialize obstacles
+  obstacles.push_back(std::make_unique<Rock>(200, 150, rockTexture));
+  obstacles.push_back(std::make_unique<Bird>(400, 100, birdTexture));
+}
+
+void Game::UpdateObstacles() {
+  // Update obstacles
+  for (auto& obstacle : obstacles) {
+      obstacle->Move();
   }
 }
 
