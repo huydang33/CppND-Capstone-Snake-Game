@@ -1,6 +1,8 @@
 #include "snake.h"
 #include <cmath>
 #include <iostream>
+#include <unordered_set>
+#include <queue>
 
 void Snake::Update() {
   SDL_Point prev_cell{
@@ -76,4 +78,33 @@ bool Snake::SnakeCell(int x, int y) {
     }
   }
   return false;
+}
+
+int SmartSnake::Heuristic(const SDL_Point &a, const SDL_Point &b) {
+  // Manhattan distance
+  return abs(a.x - b.x) + abs(a.y - b.y);
+}
+
+std::vector<SDL_Point> SmartSnake::GetNeighbors(const SDL_Point &node)
+{
+  std::vector<SDL_Point> neighbors;
+
+  /* Up, down, left, right */
+  neighbors.push_back({node.x + 1, node.y});
+  neighbors.push_back({node.x - 1, node.y});
+  neighbors.push_back({node.x, node.y + 1});
+  neighbors.push_back({node.x, node.y - 1});
+}
+
+std::vector<SDL_Point> SmartSnake::FindPath(SDL_Point food) {
+  std::priority_queue<Node, std::vector<Node>, CompareNodes> openList;
+  std::unordered_set<SDL_Point, PointHash> closedList;
+
+  /* Push start point to open list*/
+  SDL_Point startPoint = {static_cast<int>(head_x), static_cast<int>(head_y)};
+  openList.push(Node(&startPoint, 0, Heuristic(startPoint, food)));
+
+
+
+  return {};
 }
