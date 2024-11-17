@@ -6,6 +6,7 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
+#include <memory>
 
 void Snake::Update() {
   SDL_Point prev_cell{
@@ -147,7 +148,8 @@ std::vector<Node> SmartSnake::FindPath(SDL_Point food)
       // Calculate g(x) and h(x)
       int g_cost = current.gCost + 1;
       int h_cost = Heuristic(neighbor_pos, food);
-      Node* neighborNode = new Node(new SDL_Point{neighbor_pos.x, neighbor_pos.y}, g_cost, h_cost, &current);
+      auto neighbor_point = std::make_unique<SDL_Point>(neighbor_pos);
+      Node* neighborNode = new Node(neighbor_point.release(), g_cost, h_cost, &current);
 
       // Add to Open Set
       open_set.push(*neighborNode);
