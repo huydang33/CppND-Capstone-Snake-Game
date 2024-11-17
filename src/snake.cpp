@@ -115,16 +115,16 @@ std::vector<Node> SmartSnake::FindPath(SDL_Point food)
   open_set.push(Node(&startPoint, 0, Heuristic(startPoint, food)));
 
   while (!open_set.empty()) {
-    // Lấy nút có chi phí thấp nhất từ Open Set
+    // Lowest cost node from open_set
     Node current = open_set.top();
     open_set.pop();
 
-    // Kiểm tra nếu đạt đến đích
+    // Check if reach the food
     if (current.point->x == food.x && current.point->y == food.y) {
         std::vector<Node> path;
         Node* temp = &current;
 
-        // Xây dựng lại đường đi từ nút đích về nút bắt đầu
+        // Build the path
         while (temp) {
             path.push_back(*temp);
             temp = temp->parent;
@@ -133,23 +133,23 @@ std::vector<Node> SmartSnake::FindPath(SDL_Point food)
         return path;
     }
 
-    // Thêm nút hiện tại vào Closed Set
+    // Add to closed set
     closed_set.insert(std::to_string(current.point->x) + "," + std::to_string(current.point->y));
 
-    // Lấy các nút lân cận
+    // Get neighbors node
     for (const auto& neighbor_pos : GetNeighbors(*current.point)) 
     {
-      if (SnakeCell(neighbor_pos.x, neighbor_pos.y)) continue; // Bỏ qua nếu nút nằm trên thân rắn
+      if (SnakeCell(neighbor_pos.x, neighbor_pos.y)) continue; // Skip if it in Snake cell
 
       std::string neighbor_key = std::to_string(neighbor_pos.x) + "," + std::to_string(neighbor_pos.y);
-      if (closed_set.find(neighbor_key) != closed_set.end()) continue; // Đã xét
+      if (closed_set.find(neighbor_key) != closed_set.end()) continue;
 
-      // Tính toán chi phí g(n) và h(n)
+      // Calculate g(x) and h(x)
       int g_cost = current.gCost + 1;
       int h_cost = Heuristic(neighbor_pos, food);
       Node* neighborNode = new Node(new SDL_Point{neighbor_pos.x, neighbor_pos.y}, g_cost, h_cost, &current);
 
-      // Thêm vào Open Set
+      // Add to Open Set
       open_set.push(*neighborNode);
     }
   }
