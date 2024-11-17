@@ -9,10 +9,17 @@ struct Node {
   SDL_Point *point;              // Current position (x,y)
   int gCost;                    // Cost from the start node to current node
   int hCost;                    // Cost from current node to finish node
+  int f_cost() const {          // Total Cost
+    return gCost + hCost;
+  }
   Node* parent;                 // Pointer to the previous node in the path
 
   Node(SDL_Point *p, int g, int h, Node* prt = nullptr)
-      : point(p), gCost(g), hCost(h), parent((prt)) {}
+    : point(p), gCost(g), hCost(h), parent((prt)) {}
+  
+  bool operator>(const Node& other) const {
+    return f_cost() > other.f_cost();
+  }
 };
 
 struct CompareNodes {
@@ -66,7 +73,7 @@ class SmartSnake: public Snake {
 public:
   SmartSnake(int grid_width, int grid_height): Snake(grid_width, grid_height) {}
 
-  std::vector<SDL_Point> FindPath(SDL_Point food);
+  std::vector<Node> FindPath(SDL_Point food);
 
 private:
   std::vector<SDL_Point> GetNeighbors(const SDL_Point &node);

@@ -3,6 +3,9 @@
 #include <iostream>
 #include <unordered_set>
 #include <queue>
+#include <cmath>
+#include <algorithm>
+#include <vector>
 
 void Snake::Update() {
   SDL_Point prev_cell{
@@ -94,17 +97,62 @@ std::vector<SDL_Point> SmartSnake::GetNeighbors(const SDL_Point &node)
   neighbors.push_back({node.x - 1, node.y});
   neighbors.push_back({node.x, node.y + 1});
   neighbors.push_back({node.x, node.y - 1});
+
+  return neighbors;
 }
 
-std::vector<SDL_Point> SmartSnake::FindPath(SDL_Point food) {
-  std::priority_queue<Node, std::vector<Node>, CompareNodes> openList;
-  std::unordered_set<SDL_Point, PointHash> closedList;
+bool isValid(int x, int y, const std::vector<std::vector<int>>& grid) {
+    return x >= 0 && y >= 0 && x < grid.size() && y < grid[0].size() && grid[x][y] == 0;
+}
+
+std::vector<Node> SmartSnake::FindPath(SDL_Point food) 
+{
+  std::priority_queue<Node, std::vector<Node>, CompareNodes> open_set;
+  std::unordered_set<std::string> closed_set;
 
   /* Push start point to open list*/
   SDL_Point startPoint = {static_cast<int>(head_x), static_cast<int>(head_y)};
-  openList.push(Node(&startPoint, 0, Heuristic(startPoint, food)));
+  open_set.push(Node(&startPoint, 0, Heuristic(startPoint, food)));
 
+  while (!open_set.empty()) {
+    // Lấy nút có chi phí thấp nhất từ Open Set
+    Node current = open_set.top();
+    open_set.pop();
 
+    // Kiểm tra nếu đạt đến đích
+    if (current.point->x == food.x && current.point->y == food.y) {
+        std::vector<Node> path;
+        Node* temp = &current;
+
+        // Xây dựng lại đường đi từ nút đích về nút bắt đầu
+        while (temp) {
+            path.push_back(*temp);
+            temp = temp->parent;
+        }
+        std::reverse(path.begin(), path.end());
+        return path;
+    }
+
+    // Thêm nút hiện tại vào Closed Set
+    closed_set.insert(std::to_string(current.point->x) + "," + std::to_string(current.point->y));
+
+    // Lấy các nút lân cận
+    for (const auto& neighbor_pos : GetNeighbors(*current.point)) 
+    {
+      if (SnakeCell(neighbor_pos.x, neighbor_pos.y)) continue; // Bỏ qua nếu nút nằm trên thân rắn
+
+      std::string neighbor_key = std::to_string(neighbor_pos.x) + "," + std::to_string(neighbor_pos.y);
+      if (closed_set.find(neighbor_key) != closed_set.end()) continue; // Đã xét
+
+      // Tính toán chi phí g(n) và h(n)
+      int g_cost = current.gCost + 1;
+      int h_cost = Heuristic(neighbor_pos, food);
+      Node* neighborNode = new Node(new SDL_Point{neighbor_pos.x, neighbor_pos.y}, g_cost, h_cost, &current);
+
+      // Thêm vào Open Set
+      open_set.push(*neighborNode);
+    }
+  }
 
   return {};
 }
