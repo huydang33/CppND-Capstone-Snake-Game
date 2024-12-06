@@ -4,7 +4,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#define INPUT_TXT_STRING "/home/huy/repo/CppND-Capstone-Snake-Game/data/users.txt"
+#define INPUT_TXT_STRING ""
 
 enum e_return_result
 {
