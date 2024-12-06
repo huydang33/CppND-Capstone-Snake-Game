@@ -69,15 +69,4 @@ class Snake {
   int grid_height;
 };
 
-class SmartSnake: public Snake {
-public:
-  SmartSnake(int grid_width, int grid_height): Snake(grid_width, grid_height) {}
-
-  std::vector<Node> FindPath(SDL_Point food);
-
-private:
-  std::vector<SDL_Point> GetNeighbors(const SDL_Point &node);
-  int Heuristic(const SDL_Point &a, const SDL_Point &b);
-};
-
 #endif
