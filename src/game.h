@@ -7,7 +7,6 @@
 #include "controller.h"
 #include "renderer.h"
 #include "snake.h"
-#include "obstacle.h"
 
 class Game {
  public:
@@ -20,7 +19,7 @@ class Game {
  private:
   Snake snake;
   SDL_Point food;
-  std::vector<std::unique_ptr<Obstacle>> obstacles;
+  std::vector<SDL_Point> obstacles;
 
   std::random_device dev;
   std::mt19937 engine;
@@ -31,9 +30,6 @@ class Game {
 
   void PlaceFood();
   void Update();
-  void InitObstacles(SDL_Renderer* renderer);
-  void UpdateObstacles();
-  void RenderObstacles(Renderer& renderer);
 };
 
 #endif

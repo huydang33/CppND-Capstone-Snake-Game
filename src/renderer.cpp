@@ -1,7 +1,8 @@
 #include "renderer.h"
 #include <iostream>
 #include <string>
-#include "obstacle.h"
+#include <cstdlib>
+#include <ctime>
 
 Renderer::Renderer(const std::size_t screen_width,
                    const std::size_t screen_height,
@@ -39,7 +40,23 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
-void Renderer::Render(Snake const snake, SDL_Point const &food, std::vector<std::unique_ptr<Obstacle>> &obstacles) {
+void Renderer::InitObstacle(int num_obstacles)
+{
+  std::srand(std::time(0));
+
+  // Clear any existing obstacles
+  obstacles.clear();
+
+  // Generate random obstacles
+  for (int i = 0; i < num_obstacles; ++i) {
+    SDL_Point obstacle;
+    obstacle.x = std::rand() % grid_width;
+    obstacle.y = std::rand() % grid_height;
+    obstacles.push_back(obstacle);
+  }
+}
+
+void Renderer::Render(Snake const snake, SDL_Point const &food) {
   SDL_Rect block;
   block.w = screen_width / grid_width;
   block.h = screen_height / grid_height;
@@ -54,6 +71,14 @@ void Renderer::Render(Snake const snake, SDL_Point const &food, std::vector<std:
   block.y = food.y * block.h;
   SDL_RenderFillRect(sdl_renderer, &block);
 
+  // Render stone
+  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+  for (SDL_Point const &stone : obstacles) {
+    block.x = stone.x * block.w;
+    block.y = stone.y * block.h;
+    SDL_RenderFillRect(sdl_renderer, &block);
+  }
+
   // Render snake's body
   SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
   for (SDL_Point const &point : snake.body) {
@@ -61,8 +86,6 @@ void Renderer::Render(Snake const snake, SDL_Point const &food, std::vector<std:
     block.y = point.y * block.h;
     SDL_RenderFillRect(sdl_renderer, &block);
   }
-
-  RenderObstacle(obstacles);
 
   // Render snake's head
   block.x = static_cast<int>(snake.head_x) * block.w;
@@ -81,10 +104,4 @@ void Renderer::Render(Snake const snake, SDL_Point const &food, std::vector<std:
 void Renderer::UpdateWindowTitle(int score, int fps) {
   std::string title{"Snake Score: " + std::to_string(score) + " FPS: " + std::to_string(fps)};
   SDL_SetWindowTitle(sdl_window, title.c_str());
-}
-
-void Renderer::RenderObstacle(std::vector<std::unique_ptr<Obstacle>> &obstacles) {
-  for (auto& obstacle : obstacles) {
-      obstacle->Render(sdl_renderer);
-  }
 }

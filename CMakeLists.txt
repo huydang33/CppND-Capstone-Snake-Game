@@ -23,7 +23,6 @@ add_executable(SnakeGame
     src/renderer.cpp 
     src/snake.cpp 
     src/user.cpp 
-    src/util.cpp 
-    src/obstacle.cpp)
+    src/util.cpp)
 string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
 target_link_libraries(SnakeGame ${SDL2_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)

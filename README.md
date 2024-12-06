@@ -33,6 +33,11 @@ In this project, you can build your own C++ application or extend this Snake gam
 3. Compile: `cmake .. && make`
 4. Run it: `./SnakeGame`.
 
+## Features add
+
+1. Enter player names and password, store highest score
+2.  
+
 
 ## CC Attribution-ShareAlike 4.0 International
 

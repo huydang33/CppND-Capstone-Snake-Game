@@ -2,18 +2,6 @@
 #include <iostream>
 #include "SDL.h"
 
-SDL_Texture* LoadTexture(const std::string &file, SDL_Renderer* renderer)
-{
-  SDL_Surface* bmp = SDL_LoadBMP(file.c_str());
-  if (!bmp) {
-      std::cerr << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
-      return nullptr;
-  }
-  SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, bmp);
-  SDL_FreeSurface(bmp);
-  return tex;
-}
-
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(grid_width, grid_height),
       engine(dev()),
@@ -29,7 +17,12 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   Uint32 frame_end;
   Uint32 frame_duration;
   int frame_count = 0;
+  int num_obstacles = 3;
   bool running = true;
+
+  // Initialize Obstacles
+  renderer.InitObstacle(num_obstacles);
+  this->obstacles = renderer.obstacles;
 
   while (running) {
     frame_start = SDL_GetTicks();
@@ -37,8 +30,12 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
     Update();
-    UpdateObstacles();
-    renderer.Render(snake, food, obstacles);
+    if (!snake.alive)
+    {
+      std::cout << "Snake died. End game!!\n";
+      return;
+    }
+    renderer.Render(snake, food);
 
     frame_end = SDL_GetTicks();
 
@@ -70,26 +67,24 @@ void Game::PlaceFood() {
     y = random_h(engine);
     // Check that the location is not occupied by a snake item before placing
     // food.
-    if (!snake.SnakeCell(x, y)) {
+    if (snake.SnakeCell(x, y)) {
+      continue;
+    }
+
+    bool overlaps_with_obstacle = false;
+    for (SDL_Point const &obstacle : this->obstacles) {
+      if (obstacle.x == x && obstacle.y == y) {
+        overlaps_with_obstacle = true;
+        break;
+      }
+    }
+
+    // Place food if not collapse with obstacles
+    if (!overlaps_with_obstacle) {
       food.x = x;
       food.y = y;
       return;
     }
-  }
-}
-
-void Game::InitObstacles(SDL_Renderer* renderer) {
-  SDL_Texture* rockTexture = LoadTexture("images/rock.bmp", renderer);
-  SDL_Texture* birdTexture = LoadTexture("images/bird.bmp", renderer);
-  // Initialize obstacles
-  obstacles.push_back(std::make_unique<Rock>(200, 150, rockTexture));
-  obstacles.push_back(std::make_unique<Bird>(400, 100, birdTexture));
-}
-
-void Game::UpdateObstacles() {
-  // Update obstacles
-  for (auto& obstacle : obstacles) {
-      obstacle->Move();
   }
 }
 
@@ -108,6 +103,13 @@ void Game::Update() {
     // Grow snake and increase speed.
     snake.GrowBody();
     snake.speed += 0.02;
+  }
+
+  for (SDL_Point const &obstacle : obstacles) {
+    if (obstacle.x == new_x && obstacle.y == new_y) {
+      snake.alive = false; // Snake die if hit obstacles
+      return;
+    }
   }
 }
 
