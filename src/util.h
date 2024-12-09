@@ -13,6 +13,12 @@ enum e_return_result
     RET_NG_SYS = -2
 };
 
+enum GAME_DIFFICULTY_LEVEL {
+  DIFF_EASY = 0,
+  DIFF_NORMAL = 1,
+  DIFF_HARD = 2
+};
+
 void setEchoMode(bool enable);
 void hidePassword(std::string &password);
 

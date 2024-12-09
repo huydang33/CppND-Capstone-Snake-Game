@@ -7,12 +7,7 @@
 #include "controller.h"
 #include "renderer.h"
 #include "snake.h"
-
-enum GAME_DIFFICULTY_LEVEL {
-  DIFF_EASY = 0,
-  DIFF_NORMAL = 1,
-  DIFF_HARD = 2
-};
+#include "util.h"
 
 class Game {
  public:
@@ -25,7 +20,7 @@ class Game {
  private:
   Snake snake;
   SDL_Point food;
-  std::vector<SDL_Point> obstacles;
+  std::vector<std::vector<SDL_Point>> obstacles;
 
   std::random_device dev;
   std::mt19937 engine;

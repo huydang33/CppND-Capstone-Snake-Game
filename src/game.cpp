@@ -1,6 +1,7 @@
 #include "game.h"
 #include <iostream>
 #include "SDL.h"
+#include "util.h"
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(grid_width, grid_height),
@@ -23,7 +24,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   // Initialize Obstacles
   if (diff_level > DIFF_EASY)
   {
-    renderer.InitObstacle(num_obstacles);
+    renderer.InitObstacle(num_obstacles, diff_level);
     this->obstacles = renderer.obstacles;
     snake.speed = diff_level == DIFF_NORMAL ? 0.5 : 1.0;
   }
@@ -76,10 +77,12 @@ void Game::PlaceFood() {
     }
 
     bool overlaps_with_obstacle = false;
-    for (SDL_Point const &obstacle : this->obstacles) {
-      if (obstacle.x == x && obstacle.y == y) {
-        overlaps_with_obstacle = true;
-        break;
+    for(const auto &wall: this->obstacles) {
+      for (SDL_Point const &obstacle : wall) {
+        if (obstacle.x == x && obstacle.y == y) {
+          overlaps_with_obstacle = true;
+          break;
+        }
       }
     }
 
@@ -109,10 +112,12 @@ void Game::Update() {
     snake.speed += 0.02;
   }
 
-  for (SDL_Point const &obstacle : obstacles) {
-    if (obstacle.x == new_x && obstacle.y == new_y) {
-      snake.alive = false; // Snake die if hit obstacles
-      return;
+  for(const auto &wall: this->obstacles) {
+    for (SDL_Point const &obstacle : wall) {
+      if (obstacle.x == new_x && obstacle.y == new_y) {
+        snake.alive = false; // Snake die if hit obstacles
+        return;
+      }
     }
   }
 }

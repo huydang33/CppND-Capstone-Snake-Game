@@ -1,3 +1,5 @@
+
+#include "game.h"
 #include "renderer.h"
 #include <iostream>
 #include <string>
@@ -5,6 +7,7 @@
 #include <ctime>
 #include <thread>
 #include <future>
+#include "util.h"
 
 Renderer::Renderer(const std::size_t screen_width,
                    const std::size_t screen_height,
@@ -42,7 +45,7 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
-void Renderer::InitObstacle(int num_obstacles)
+void Renderer::InitObstacle(int num_obstacles, GAME_DIFFICULTY_LEVEL diff_level)
 {
   std::srand(std::time(0));
 
@@ -51,10 +54,17 @@ void Renderer::InitObstacle(int num_obstacles)
 
   // Generate random obstacles
   for (int i = 0; i < num_obstacles; ++i) {
-    SDL_Point obstacle;
-    obstacle.x = std::rand() % grid_width;
-    obstacle.y = std::rand() % grid_height;
-    obstacles.push_back(obstacle);
+    std::vector<SDL_Point> wall;
+    int wall_length = diff_level == DIFF_NORMAL ? 1 : std::rand() % 3 + 2;  // Random wall length from 2 to 4
+
+    for (int j = 0; j < wall_length; ++j) {
+        SDL_Point point;
+        point.x = std::rand() % grid_width;
+        point.y = std::rand() % grid_height;
+        wall.push_back(point);
+    }
+
+    obstacles.push_back(wall);
   }
 }
 
@@ -79,10 +89,12 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
   std::future<void> obstacles_future = std::async(std::launch::async, [&]() {
     // Render stone
     SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
-    for (SDL_Point const &stone : obstacles) {
-      block.x = stone.x * block.w;
-      block.y = stone.y * block.h;
-      SDL_RenderFillRect(sdl_renderer, &block);
+    for (const auto &wall : obstacles) {
+      for (SDL_Point const &stone : wall) {
+        block.x = stone.x * block.w;
+        block.y = stone.y * block.h;
+        SDL_RenderFillRect(sdl_renderer, &block);
+      }
     }
   });
   food_future.get();
