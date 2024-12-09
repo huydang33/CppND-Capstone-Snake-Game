@@ -35,9 +35,26 @@ In this project, you can build your own C++ application or extend this Snake gam
 
 ## Features add
 
-1. Enter player names and password, store highest score
-2.  
+* Enter player names and password: Password will be encrypted and store in data/users.txt alongs with user name and highest score.
+* Difficulty setting: Easy/Normal/Hard
+* Reading and Writing user's high score.
+* Obstacles in Normal/Hard level: The snake will die if hit the obstacles.
+* Poison Food available in Hard Level: There is 30% chance that poisoned the snake and make it go in opposite direction. For example, pressing Up key will result to Down key (effective in 5 second).
+* Console output score.
 
+## Addressed rubric points
+### Loops, Functions, I/O - meet at lease 2 criteria
+* Rubic Point 1/4: The project demonstrates an understanding C++ functions and control structures
+Game.cpp line 82: PlaceFood() meet this criteria.
+
+* Rubic Point 2/4: The project accepts user input and processes the input.
+Snake.cpp line 5: SetSpeed() meet this criteria.
+
+### Object Oriented Programming - meet at least 3 criteria
+
+### Memory Management - meet at least 3 criteria
+
+### Concurrency - meet at least 2 criteria
 
 ## CC Attribution-ShareAlike 4.0 International
 

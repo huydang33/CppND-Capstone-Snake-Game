@@ -18,6 +18,7 @@ int main()
 	std::string username = "";
 	int user_score = 0;
 	User user;
+	GAME_DIFFICULTY_LEVEL level = DIFF_EASY;
 
 	ret = manager->loadUsersFromFile();
 	if(ret == RET_OK)
@@ -40,6 +41,28 @@ int main()
 			std::cout << "Invalid choice: " << choice << std::endl;
 			ret = RET_NG_SYS;
 		}
+		
+		if(ret == RET_OK)
+		{
+			std::string diff_level;
+
+			// Lambda function to validate and assign level
+			auto validate_and_assign = [](const std::string& input, GAME_DIFFICULTY_LEVEL& level) {
+				// Check if input is a valid integer and within 0, 1, 2
+				if (input == "0" || input == "1" || input == "2") {
+					level = (GAME_DIFFICULTY_LEVEL)std::stoi(input);
+					return true;
+				}
+				return false;
+			};
+
+			std::cout << "Choose difficulty level: Easy/Normal/Hard (0/1/2)\n";
+			std::cin >> diff_level;
+			if (!validate_and_assign(diff_level, level)) {
+				std::cout << "Invalid choice\n";
+				ret = RET_NG_USER;
+			}
+		}
 
 		if(ret == RET_OK)
 		{
@@ -53,7 +76,7 @@ int main()
 			Renderer renderer(kScreenWidth, kScreenHeight, kGridWidth, kGridHeight);
 			Controller controller;
 			Game game(kGridWidth, kGridHeight);
-			game.Run(controller, renderer, kMsPerFrame);
+			game.Run(controller, renderer, kMsPerFrame, level);
 			std::cout << "Game has terminated successfully!\n";
 			std::cout << "Score: " << game.GetScore() << "\n";
 			std::cout << "Size: " << game.GetSize() << "\n";

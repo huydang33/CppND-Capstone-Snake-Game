@@ -25,4 +25,4 @@ add_executable(SnakeGame
     src/user.cpp 
     src/util.cpp)
 string(STRIP ${SDL2_LIBRARIES} SDL2_LIBRARIES)
-target_link_libraries(SnakeGame ${SDL2_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(SnakeGame ${SDL2_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto pthread)
