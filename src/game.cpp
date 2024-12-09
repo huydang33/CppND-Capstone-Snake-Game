@@ -25,6 +25,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   {
     renderer.InitObstacle(num_obstacles);
     this->obstacles = renderer.obstacles;
+    snake.speed = diff_level == DIFF_NORMAL ? 0.5 : 1.0;
   }
 
   while (running) {
