@@ -20,13 +20,14 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   int frame_count = 0;
   int num_obstacles = 3;
   bool running = true;
+  this->diff_level = diff_level;
 
   // Initialize Obstacles
   if (diff_level > DIFF_EASY)
   {
     renderer.InitObstacle(num_obstacles, diff_level);
     this->obstacles = renderer.obstacles;
-    snake.speed = diff_level == DIFF_NORMAL ? 0.5 : 1.0;
+    snake.speed = diff_level == DIFF_NORMAL ? 0.15 : 0.25;
   }
 
   while (running) {
@@ -105,7 +106,18 @@ void Game::Update() {
 
   // Check if there's food over here
   if (food.x == new_x && food.y == new_y) {
-    score++;
+    switch(this->diff_level)
+    {
+      case DIFF_EASY:
+        score++;
+        break;
+      case DIFF_NORMAL:
+        score +=2;
+        break;
+      case DIFF_HARD:
+        score +=3;
+        break;
+    }
     PlaceFood();
     // Grow snake and increase speed.
     snake.GrowBody();

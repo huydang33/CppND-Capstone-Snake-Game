@@ -92,54 +92,38 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
   SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
   SDL_RenderClear(sdl_renderer);
 
-  // Use multiple threads to render different elements
-  std::future<void> food_future = std::async(std::launch::async, [&]() {
-    // Render food
-    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xCC, 0x00, 0xFF);
-    block.x = food.x * block.w;
-    block.y = food.y * block.h;
-    SDL_RenderFillRect(sdl_renderer, &block);
-  });
+  // Render food
+  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xCC, 0x00, 0xFF);
+  block.x = food.x * block.w;
+  block.y = food.y * block.h;
+  SDL_RenderFillRect(sdl_renderer, &block);
 
-  std::future<void> obstacles_future = std::async(std::launch::async, [&]() {
-    // Render stone
-    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
-    for (const auto &wall : obstacles) {
-      for (SDL_Point const &stone : wall) {
-        block.x = stone.x * block.w;
-        block.y = stone.y * block.h;
-        SDL_RenderFillRect(sdl_renderer, &block);
-      }
-    }
-  });
-  food_future.get();
-  obstacles_future.get();
-
-  std::thread snake_body_thread([&]() {
-    // Render snake's body
-    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    for (SDL_Point const &point : snake.body) {
+  // Render obstacles
+  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+  for (const auto &obstacle : obstacles) {
+    for (SDL_Point const &point : obstacle) {
       block.x = point.x * block.w;
       block.y = point.y * block.h;
       SDL_RenderFillRect(sdl_renderer, &block);
     }
-  });
-
-  std::thread snake_head_thread([&]() {
-    // Render snake's head
-    block.x = static_cast<int>(snake.head_x) * block.w;
-    block.y = static_cast<int>(snake.head_y) * block.h;
-    if (snake.alive) {
-      SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0x7A, 0xCC, 0xFF);
-    } else {
-      SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
-    }
+  }
+  // Render snake's body
+  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+  for (SDL_Point const &point : snake.body) {
+    block.x = point.x * block.w;
+    block.y = point.y * block.h;
     SDL_RenderFillRect(sdl_renderer, &block);
-  });
+  }
 
-  // Join all threads
-  snake_body_thread.join();
-  snake_head_thread.join();
+  // Render snake's head
+  block.x = static_cast<int>(snake.head_x) * block.w;
+  block.y = static_cast<int>(snake.head_y) * block.h;
+  if (snake.alive) {
+    SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0x7A, 0xCC, 0xFF);
+  } else {
+    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+  }
+  SDL_RenderFillRect(sdl_renderer, &block);
 
   // Update screen after rendering all components
   SDL_RenderPresent(sdl_renderer);

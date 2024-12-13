@@ -28,6 +28,7 @@ class Game {
   std::uniform_int_distribution<int> random_h;
 
   int score{0};
+  GAME_DIFFICULTY_LEVEL diff_level{DIFF_EASY};
 
   void PlaceFood();
   void Update();
