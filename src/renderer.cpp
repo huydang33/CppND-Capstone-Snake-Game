@@ -5,8 +5,6 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
-#include <thread>
-#include <future>
 #include "util.h"
 
 Renderer::Renderer(const std::size_t screen_width,
@@ -83,7 +81,7 @@ void Renderer::InitObstacle(int num_obstacles, GAME_DIFFICULTY_LEVEL diff_level)
   }
 }
 
-void Renderer::Render(Snake const snake, SDL_Point const &food) {
+void Renderer::Render(Snake const snake, SDL_Point const &food, bool special_food_active, SDL_Point special_food) {
   SDL_Rect block;
   block.w = screen_width / grid_width;
   block.h = screen_height / grid_height;
@@ -97,6 +95,15 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
   block.x = food.x * block.w;
   block.y = food.y * block.h;
   SDL_RenderFillRect(sdl_renderer, &block);
+
+  // Render special food
+  if(special_food_active)
+  {
+    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xCC, 0x00, 0xFF);
+    block.x = special_food.x * block.w;
+    block.y = special_food.y * block.h;
+    SDL_RenderFillRect(sdl_renderer, &block);
+  }
 
   // Render obstacles
   SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
