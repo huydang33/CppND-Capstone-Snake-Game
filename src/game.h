@@ -31,7 +31,8 @@ class Game {
   GAME_DIFFICULTY_LEVEL diff_level{DIFF_EASY};
 
   void PlaceFood();
-  void Update(bool special_food_active);
+  void Update();
+  void UpdateScore(bool isSpecialFood);
 };
 
 #endif

@@ -73,7 +73,14 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
-    Update(special_food_active);
+    Update();
+    std::lock_guard<std::mutex> lock(food_mutex);
+    // Check if snake eats special food
+    if (special_food_active && static_cast<int>(snake.head_x) == special_food.x && static_cast<int>(snake.head_y) == special_food.y) 
+    {
+      UpdateScore(true);
+      special_food_active = false;
+    }
     if (!snake.alive)
     {
       std::cout << "Snake died. End game!!\n";
@@ -82,14 +89,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     }
     // Render game objects
     {
-      std::lock_guard<std::mutex> lock(food_mutex);
       renderer.Render(snake, food, special_food_active, special_food);
-
-      // Check if snake eats special food
-      if (special_food_active && snake.head_x == special_food.x && snake.head_y == special_food.y) {
-        score += 2; // Double score for special food
-        special_food_active = false;
-      }
     }
 
     frame_end = SDL_GetTicks();
@@ -146,7 +146,23 @@ void Game::PlaceFood() {
   }
 }
 
-void Game::Update(bool special_food_active) {
+void Game::UpdateScore(bool isSpecialFood)
+{
+  switch(this->diff_level)
+  {
+    case DIFF_NORMAL:
+      score += isSpecialFood ? 4 : 2;
+      break;
+    case DIFF_HARD:
+      score += isSpecialFood ? 6 : 3;
+      break;
+    default:
+      score += isSpecialFood ? 2 : 1;
+      break;
+  }
+}
+
+void Game::Update() {
   if (!snake.alive) return;
 
   snake.Update();
@@ -156,18 +172,7 @@ void Game::Update(bool special_food_active) {
 
   // Check if there's food over here
   if (food.x == new_x && food.y == new_y) {
-    switch(this->diff_level)
-    {
-      case DIFF_EASY:
-        score += special_food_active ? 1 : 2;
-        break;
-      case DIFF_NORMAL:
-        score += special_food_active ? 2 : 4;
-        break;
-      case DIFF_HARD:
-        score += special_food_active ? 3 : 6;
-        break;
-    }
+    UpdateScore(false);
     PlaceFood();
     // Grow snake and increase speed.
     snake.GrowBody();
