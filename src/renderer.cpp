@@ -68,13 +68,34 @@ void Renderer::InitObstacle(int num_obstacles, GAME_DIFFICULTY_LEVEL diff_level)
   // Generate random obstacles
   for (int i = 0; i < num_obstacles; ++i) {
     std::vector<SDL_Point> wall;
-    int wall_length = diff_level == DIFF_NORMAL ? 1 : std::rand() % 3 + 2;  // Random wall length from 2 to 4
+    int wall_length = diff_level == DIFF_NORMAL ? 2 : std::rand() % 3 + 2;  // Random wall length from 2 to 4
 
-    for (int j = 0; j < wall_length; ++j) {
-        SDL_Point point;
-        point.x = std::rand() % grid_width;
-        point.y = std::rand() % grid_height;
-        wall.push_back(point);
+    // Random starting point
+    SDL_Point start_point;
+    start_point.x = std::rand() % grid_width;
+    start_point.y = std::rand() % grid_height;
+    wall.push_back(start_point);
+
+    // Randomize direction: 0 = horizontal, 1 = vertical, 2 = diagonal
+    int direction = std::rand() % 3;
+
+    for (int j = 1; j < wall_length; ++j) {
+      SDL_Point next_point = wall.back(); // Get the last point in the wall
+
+      switch (direction) {
+        case 0: // Horizontal
+          next_point.x = (next_point.x + 1) % grid_width;
+          break;
+        case 1: // Vertical
+          next_point.y = (next_point.y + 1) % grid_height;
+          break;
+        case 2: // Diagonal
+          next_point.x = (next_point.x + 1) % grid_width;
+          next_point.y = (next_point.y + 1) % grid_height;
+          break;
+      }
+
+      wall.push_back(next_point);
     }
 
     obstacles.push_back(wall);
