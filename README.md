@@ -51,10 +51,31 @@ Game.cpp line 82: PlaceFood() meet this criteria.
 Snake.cpp line 5: SetSpeed() meet this criteria.
 
 ### Object Oriented Programming - meet at least 3 criteria
+* Rubic Point 1/4: One or more classes are added to the project with appropriate access specifiers for class members.
+user.cpp : User() meets this criteria when creating a class for User/UserManager class to store/process user information
+
+* Rubic Point 2/4: Class constructors utilize member initialization lists.
+user.cpp : User() meets this criteria.
+
+* Rubic Point 1/4: The project uses multithreading.
+Renderer.cpp line 91: Render() meets this criteria.
 
 ### Memory Management - meet at least 3 criteria
+* Rubic Point 1/6: The project makes use of references in function declarations.
+
+
+* Rubic Point 3/6: The project uses scope / Resource Acquisition Is Initialization (RAII) where appropriate.
+
+
+* Rubic Point 6/6: The project uses smart pointers instead of raw pointers.
+main.cpp meets this criteria: Use smart pointer to proccess for UserManager class.
 
 ### Concurrency - meet at least 2 criteria
+* Rubic Point 1/4: The project uses multithreading.
+Renderer.cpp line 91: Render() meets this criteria.
+
+* Rubic Point 2/4: A promise and future is used in the project.
+Renderer.cpp line 71: Render() meets this criteria.
 
 ## CC Attribution-ShareAlike 4.0 International
 
