@@ -15,11 +15,14 @@ Renderer::Renderer(const std::size_t screen_width,
     : screen_width(screen_width),
       screen_height(screen_height),
       grid_width(grid_width),
-      grid_height(grid_height) {
+      grid_height(grid_height),
+      sdl_window(nullptr),
+      sdl_renderer(nullptr) {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "SDL could not initialize.\n";
     std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
+    return; // Exit constructor early if SDL_Init fails
   }
 
   // Create Window
@@ -29,7 +32,9 @@ Renderer::Renderer(const std::size_t screen_width,
 
   if (nullptr == sdl_window) {
     std::cerr << "Window could not be created.\n";
-    std::cerr << " SDL_Error: " << SDL_GetError() << "\n";
+    std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
+    SDL_Quit(); // Clean up SDL if window creation fails
+    return;
   }
 
   // Create renderer
@@ -37,11 +42,21 @@ Renderer::Renderer(const std::size_t screen_width,
   if (nullptr == sdl_renderer) {
     std::cerr << "Renderer could not be created.\n";
     std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
+    SDL_DestroyWindow(sdl_window); // Clean up window if renderer creation fails
+    SDL_Quit();
+    return;
   }
 }
 
 Renderer::~Renderer() {
-  SDL_DestroyWindow(sdl_window);
+  if (sdl_renderer) {
+    SDL_DestroyRenderer(sdl_renderer);
+    sdl_renderer = nullptr;
+  }
+  if (sdl_window) {
+    SDL_DestroyWindow(sdl_window);
+    sdl_window = nullptr;
+  }
   SDL_Quit();
 }
 
