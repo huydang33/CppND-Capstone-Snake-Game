@@ -120,14 +120,14 @@ void Renderer::Render(Snake const snake, SDL_Point const &food, bool special_foo
   // Render special food
   if(special_food_active)
   {
-    SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xCC, 0x00, 0xFF);
+    SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0xFF, 0x00, 0xFF);
     block.x = special_food.x * block.w;
     block.y = special_food.y * block.h;
     SDL_RenderFillRect(sdl_renderer, &block);
   }
 
   // Render obstacles
-  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+  SDL_SetRenderDrawColor(sdl_renderer, 0xA5, 0x2A, 0x2A, 0xFF);
   for (const auto &obstacle : obstacles) {
     for (SDL_Point const &point : obstacle) {
       block.x = point.x * block.w;
