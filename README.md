@@ -36,10 +36,10 @@ In this project, you can build your own C++ application or extend this Snake gam
 ## Features add
 
 * Enter player names and password: Password will be encrypted and store in data/users.txt alongs with user name and highest score.
-* Difficulty setting: Easy/Normal/Hard
+* Difficulty setting: Easy/Normal/Hard with 1/2/3 score for each food.
 * Reading and Writing user's high score.
 * Obstacles in Normal/Hard level: The snake will die if hit the obstacles.
-* Poison Food available in Hard Level: There is 30% chance that poisoned the snake and make it go in opposite direction. For example, pressing Up key will result to Down key (effective in 5 second).
+* Special food: Randomly appears after 5 seconds and stays for 3 second before disappearing. Gain double points based on difficulty level.
 * Console output score.
 
 ## Addressed rubric points
@@ -51,31 +51,34 @@ Game.cpp line 82: PlaceFood() meet this criteria.
 Snake.cpp line 5: SetSpeed() meet this criteria.
 
 ### Object Oriented Programming - meet at least 3 criteria
-* Rubic Point 1/4: One or more classes are added to the project with appropriate access specifiers for class members.
+* Rubic Point 1/6: One or more classes are added to the project with appropriate access specifiers for class members.
 user.cpp : User() meets this criteria when creating a class for User/UserManager class to store/process user information
 
-* Rubic Point 2/4: Class constructors utilize member initialization lists.
+* Rubic Point 2/6: Class constructors utilize member initialization lists.
 user.cpp : User() meets this criteria.
 
-* Rubic Point 1/4: The project uses multithreading.
-Renderer.cpp line 91: Render() meets this criteria.
+* Rubic Point 6/6: Templates generalize functions or classes in the project.
+user.cpp: User() meets this criteria.
 
 ### Memory Management - meet at least 3 criteria
 * Rubic Point 1/6: The project makes use of references in function declarations.
+user.cpp: User() meets this criteria.
 
-
-* Rubic Point 3/6: The project uses scope / Resource Acquisition Is Initialization (RAII) where appropriate.
-
+* Rubic Point 4/6: The project follows the Rule of 5.
+user.cpp : User() and UserManager() classes meet this criteria.
 
 * Rubic Point 6/6: The project uses smart pointers instead of raw pointers.
 main.cpp meets this criteria: Use smart pointer to proccess for UserManager class.
 
 ### Concurrency - meet at least 2 criteria
 * Rubic Point 1/4: The project uses multithreading.
-Renderer.cpp line 91: Render() meets this criteria.
+game.cpp line 42: Game::Run() meets this criteria. Run 2 threads, 1 thread is for normal logic, 2 thread is for special food
 
-* Rubic Point 2/4: A promise and future is used in the project.
-Renderer.cpp line 71: Render() meets this criteria.
+* Rubic Point 3/4: A mutex or lock is used in the project.
+game.cpp line 63: Game::Run() meets this criteria when using mutex to lock to handle special food logic.
+
+* Rubic Point 4/4: A condition variable is used in the project.
+game.cpp: Game::Run() meets this criteria when using conditional variable to immediately close the sub-thread after the snake died. 
 
 ## CC Attribution-ShareAlike 4.0 International
 
