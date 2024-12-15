@@ -55,9 +55,6 @@ std::string User::hashPassword(const std::string& password) {
     return oss.str();
 }
 
-// UserManager class implementation
-UserManager::UserManager(const std::string& filename) : _filename(filename) {}
-
 e_return_result UserManager::loadUsersFromFile() {
     e_return_result ret = RET_OK;
     std::ifstream file(_filename);
