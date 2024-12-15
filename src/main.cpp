@@ -17,7 +17,7 @@ int main()
 	std::string input;
 	std::string username = "";
 	int user_score = 0;
-	User user;
+	User<std::string, std::string, std::string> user;
 	GAME_DIFFICULTY_LEVEL level = DIFF_EASY;
 
 	ret = manager->loadUsersFromFile();

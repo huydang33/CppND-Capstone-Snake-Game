@@ -6,45 +6,50 @@
 #include <fstream>
 #include "util.h"
 
-// Constructor
-User::User(std::string username, std::string password, std::string userscore)
-    : _username(std::move(username)), _password(hashPassword(password)), _userscore(std::move(userscore)) {}
-
 // Setter
-void User::setUsername(const std::string &username)   { this->_username = username; };
-void User::setPassword(const std::string &password)   { this->_password = password; };
-void User::setUserscore(const std::string &userscore) { this->_userscore = userscore; };
+template <class UsernameType, class PasswordType, class ScoreType>
+void User<UsernameType, PasswordType, ScoreType>::setUsername(const UsernameType &username)   { this->_username = username; };
+template <class UsernameType, class PasswordType, class ScoreType>
+void User<UsernameType, PasswordType, ScoreType>::setPassword(const PasswordType &password)   { this->_password = password; };
+template <class UsernameType, class PasswordType, class ScoreType>
+void User<UsernameType, PasswordType, ScoreType>::setUserscore(const ScoreType &userscore)    { this->_userscore = userscore; };
 
 // Getter
-const std::string& User::getUsername() const {
+template <class UsernameType, class PasswordType, class ScoreType>
+const UsernameType& User<UsernameType, PasswordType, ScoreType>::getUsername() const {
     return _username;
 }
 
-const std::string& User::getUserscore() const {
+template <class UsernameType, class PasswordType, class ScoreType>
+const ScoreType& User<UsernameType, PasswordType, ScoreType>::getUserscore() const {
     return _userscore;
 }
 
-bool User::checkPassword(const std::string& password) const {
+template <class UsernameType, class PasswordType, class ScoreType>
+bool User<UsernameType, PasswordType, ScoreType>::checkPassword(const PasswordType& password) const {
     return _password == hashPassword(password);
 }
 
 // Convert to string to store in txt file
-std::string User::toString() const {
+template <class UsernameType, class PasswordType, class ScoreType>
+std::string User<UsernameType, PasswordType, ScoreType>::toString() const {
     return _username + " " + _password + " " + _userscore;
 }
 
 // Create instance User from string
-User User::fromString(const std::string& str) {
+template <class UsernameType, class PasswordType, class ScoreType>
+User<UsernameType, PasswordType, ScoreType> User<UsernameType, PasswordType, ScoreType>::fromString(const std::string& str) {
     std::string init_score = "0";
     std::istringstream iss(str);
     std::string username, hashedPassword;
     iss >> username >> hashedPassword >> init_score;
-    User user(username, "", init_score);
+    User<std::string, std::string, std::string> user(username, "", init_score);
     user._password = hashedPassword; // Store hash password
     return user;
 }
 
-std::string User::hashPassword(const std::string& password) {
+template <class UsernameType, class PasswordType, class ScoreType>
+PasswordType User<UsernameType, PasswordType, ScoreType>::hashPassword(const PasswordType& password) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)password.c_str(), password.size(), hash);
 
@@ -65,14 +70,14 @@ e_return_result UserManager::loadUsersFromFile() {
     else {
         std::string line;
         while (std::getline(file, line)) {
-            _users.push_back(User::fromString(line));
+            _users.push_back(User<std::string, std::string, std::string>::fromString(line));
         }
     }
 
     return ret;
 }
 
-e_return_result UserManager::saveUsersToFile(User const user) {
+e_return_result UserManager::saveUsersToFile(User<std::string, std::string, std::string> const user) {
     e_return_result ret = RET_OK;
     std::ofstream file(_filename, std::ios::out | std::ios::app);
     if (!file.is_open()) {
@@ -98,7 +103,7 @@ e_return_result UserManager::addUser(const std::string& username, const std::str
     if(ret == RET_OK)
     {
         // Add new user
-        User new_user = User(username, password, "0");
+        User new_user = User<std::string, std::string, std::string>(username, password, "0");
         _users.push_back(new_user);
         ret = saveUsersToFile(new_user);
     }
@@ -114,7 +119,7 @@ e_return_result UserManager::authenticateUser(const std::string& username, const
     return RET_NG_USER; // login failed
 }
 
-e_return_result UserManager::setUser(User &user, std::string const &username, std::string const &password)
+e_return_result UserManager::setUser(User<std::string, std::string, std::string> &user, std::string const &username, std::string const &password)
 {
     e_return_result ret = RET_OK;
     // Assign username and password to the argument user
@@ -128,7 +133,7 @@ e_return_result UserManager::setUser(User &user, std::string const &username, st
     return ret;
 }
 
-e_return_result UserManager::registerNewUser(User &user)
+e_return_result UserManager::registerNewUser(User<std::string, std::string, std::string> &user)
 {
     e_return_result ret = RET_OK;
 	std::string username, password;
@@ -149,7 +154,7 @@ e_return_result UserManager::registerNewUser(User &user)
     return ret;
 }
 
-e_return_result UserManager::loginUser(User &user)
+e_return_result UserManager::loginUser(User<std::string, std::string, std::string> &user)
 {
 	std::string username, password;
 	std::cout << "Enter username to login: ";
