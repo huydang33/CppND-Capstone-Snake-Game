@@ -4,6 +4,7 @@
 #include "util.h"
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(grid_width, grid_height),
@@ -34,6 +35,8 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 
   // Thread synchronization for special food
   std::mutex food_mutex;
+  std::condition_variable cv;
+  bool stop_thread = false;
   bool special_food_active = false;
   SDL_Point special_food;
   Uint32 special_food_timer = 0;
@@ -41,11 +44,14 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   // Thread to handle special food logic
   std::thread special_food_thread([&]() 
   {
-    while (running) 
+    std::unique_lock<std::mutex> lock(food_mutex);
+    while (!stop_thread) 
     {
-      {
-        std::this_thread::sleep_for(std::chrono::seconds(5)); // Wait for 5 seconds
+      if (cv.wait_for(lock, std::chrono::seconds(5), [&]() { return stop_thread; })) {
+        break;
+      }
 
+      {
         std::lock_guard<std::mutex> lock(food_mutex);
         if (!special_food_active) {
           // Generate random position for special food
@@ -57,13 +63,12 @@ void Game::Run(Controller const &controller, Renderer &renderer,
       }
 
       // Wait for 5 seconds of active special food
-      std::this_thread::sleep_for(std::chrono::seconds(5));
+      if (cv.wait_for(lock, std::chrono::seconds(5), [&]() { return stop_thread; })) {
+        break;
+      }
 
-      {
-        std::lock_guard<std::mutex> lock(food_mutex);
-        if (special_food_active) {
-          special_food_active = false;
-        }
+      if (special_food_active) {
+        special_food_active = false;
       }
     }
   });
@@ -74,24 +79,28 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
     Update();
-    std::lock_guard<std::mutex> lock(food_mutex);
-    // Check if snake eats special food
-    if (special_food_active && static_cast<int>(snake.head_x) == special_food.x && static_cast<int>(snake.head_y) == special_food.y) 
+
     {
-      UpdateScore(true);
-      special_food_active = false;
+        std::lock_guard<std::mutex> lock(food_mutex);
+        if (special_food_active && static_cast<int>(snake.head_x) == special_food.x && static_cast<int>(snake.head_y) == special_food.y) {
+            UpdateScore(true);
+            special_food_active = false;
+        }
     }
+
     if (!snake.alive)
     {
       std::cout << "Snake died. End game!!\n";
-      running = false;
+      {
+        std::lock_guard<std::mutex> lock(food_mutex);
+        stop_thread = true;
+      }
+      cv.notify_all(); // Gửi tín hiệu đến thread phụ để thoát
+      running = false; // Thoát vòng lặp game
       break;
     }
     // Render game objects
-    {
-      renderer.Render(snake, food, special_food_active, special_food);
-    }
-
+    renderer.Render(snake, food, special_food_active, special_food);
     frame_end = SDL_GetTicks();
 
     // Keep track of how long each loop through the input/update/render cycle
@@ -113,7 +122,9 @@ void Game::Run(Controller const &controller, Renderer &renderer,
       SDL_Delay(target_frame_duration - frame_duration);
     }
   }
-  special_food_thread.join();
+  if (special_food_thread.joinable()) {
+    special_food_thread.join();
+  }
 }
 
 void Game::PlaceFood() {
