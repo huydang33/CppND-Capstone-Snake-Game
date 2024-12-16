@@ -77,9 +77,6 @@ game.cpp line 42: Game::Run() meets this criteria. Run 2 threads, 1 thread is fo
 * Rubic Point 3/4: A mutex or lock is used in the project.
 game.cpp line 63: Game::Run() meets this criteria when using mutex to lock to handle special food logic.
 
-* Rubic Point 4/4: A condition variable is used in the project.
-game.cpp: Game::Run() meets this criteria when using conditional variable to immediately close the sub-thread after the snake died. 
-
 ## CC Attribution-ShareAlike 4.0 International
 
 
