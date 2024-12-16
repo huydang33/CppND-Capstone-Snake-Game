@@ -4,7 +4,7 @@
 #include "util.h"
 #include <thread>
 #include <mutex>
-#include <condition_variable>
+#include <atomic>
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(grid_width, grid_height),
@@ -35,26 +35,22 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 
   // Thread synchronization for special food
   std::mutex food_mutex;
-  std::condition_variable cv;
-  bool stop_thread = false;
-  bool special_food_active = false;
+  std::atomic<bool> stop_thread(false);
+  std::atomic<bool> special_food_active(false);
   SDL_Point special_food;
   Uint32 special_food_timer = 0;
 
-  // Thread to handle special food logic
   std::thread special_food_thread([&]() 
   {
-    std::unique_lock<std::mutex> lock(food_mutex);
-    while (!stop_thread) 
-    {
-      if (cv.wait_for(lock, std::chrono::seconds(5), [&]() { return stop_thread; })) {
-        break;
-      }
+    while (true) {
+      std::this_thread::sleep_for(std::chrono::seconds(5));
 
       {
         std::lock_guard<std::mutex> lock(food_mutex);
-        if (!special_food_active) {
-          // Generate random position for special food
+        if (stop_thread) break;
+
+        if (!special_food_active) 
+        {
           special_food.x = rand() % renderer.GetGridWidth();
           special_food.y = rand() % renderer.GetGridHeight();
           special_food_active = true;
@@ -62,13 +58,15 @@ void Game::Run(Controller const &controller, Renderer &renderer,
         }
       }
 
-      // Wait for 5 seconds of active special food
-      if (cv.wait_for(lock, std::chrono::seconds(5), [&]() { return stop_thread; })) {
-        break;
-      }
+      std::this_thread::sleep_for(std::chrono::seconds(5));
 
-      if (special_food_active) {
-        special_food_active = false;
+      {
+        std::lock_guard<std::mutex> lock(food_mutex);
+        if (stop_thread) break;
+
+        if (special_food_active) {
+          special_food_active = false;
+        }
       }
     }
   });
@@ -83,8 +81,8 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     {
         std::lock_guard<std::mutex> lock(food_mutex);
         if (special_food_active && static_cast<int>(snake.head_x) == special_food.x && static_cast<int>(snake.head_y) == special_food.y) {
-            UpdateScore(true);
-            special_food_active = false;
+          UpdateScore(true);
+          special_food_active = false;
         }
     }
 
@@ -95,8 +93,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
         std::lock_guard<std::mutex> lock(food_mutex);
         stop_thread = true;
       }
-      cv.notify_all(); // Gửi tín hiệu đến thread phụ để thoát
-      running = false; // Thoát vòng lặp game
+      running = false;
       break;
     }
     // Render game objects

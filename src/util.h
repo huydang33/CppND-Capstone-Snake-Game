@@ -4,7 +4,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#define INPUT_TXT_STRING ""
+#define INPUT_TXT_STRING "../data/users.txt"
 
 enum e_return_result
 {
